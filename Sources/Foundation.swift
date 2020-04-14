@@ -109,22 +109,13 @@ extension NSObject : MustacheBoxable {
             
         } else {
             // Generic NSObject
-            
-            #if OBJC
-                return MustacheBox(
-                    value: self,
-                    keyedSubscript: { (key: String) in
-                        if GRMustacheKeyAccess.isSafeMustacheKey(key, for: self) {
-                            // Use valueForKey: for safe keys
-                            return self.value(forKey: key)
-                        } else {
-                            // Missing key
-                            return nil
-                        }
-                })
-            #else
-                return MustacheBox(value: self)
-            #endif
+            return MustacheBox(
+                value: self,
+                keyedSubscript: { key in
+                    guard self.responds(to: NSSelectorFromString(key)) else { return nil }
+                    return self.value(forKey: key)
+                }
+            )
         }
     }
 }
